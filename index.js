@@ -61,9 +61,7 @@ async function run() {
             } else if (sort === 'price-desc') {
                 sortOrder.price = -1; // High to Low
             } else if (sort === 'date-desc') {
-                sortOrder.productCreationDate = -1; // Newest first
-            } else if (sort === 'date-asc') {
-                sortOrder.productCreationDate = 1; // Oldest first
+                sortOrder.creationDate = -1; // Newest first
             }
 
             const result = await productCollection.find(query)
