@@ -44,6 +44,7 @@ async function run() {
             const category = req.query.category || '';
             const minPrice = parseFloat(req.query.minPrice) || 0;
             const maxPrice = parseFloat(req.query.maxPrice) || Number.MAX_SAFE_INTEGER;
+            const sort = req.query.sort || '';
 
             // Create a filter object
             const query = {
@@ -53,7 +54,20 @@ async function run() {
                 price: { $gte: minPrice, $lte: maxPrice }
             };
 
+            // Create a sort object
+            let sortOrder = {};
+            if (sort === 'price-asc') {
+                sortOrder.price = 1; // Low to High
+            } else if (sort === 'price-desc') {
+                sortOrder.price = -1; // High to Low
+            } else if (sort === 'date-desc') {
+                sortOrder.productCreationDate = -1; // Newest first
+            } else if (sort === 'date-asc') {
+                sortOrder.productCreationDate = 1; // Oldest first
+            }
+
             const result = await productCollection.find(query)
+                .sort(sortOrder)
                 .skip(skip)
                 .limit(limit)
                 .toArray();
@@ -67,6 +81,7 @@ async function run() {
                 currentPage: page
             });
         });
+
 
 
 
