@@ -40,16 +40,25 @@ async function run() {
             const skip = (page - 1) * limit;
 
             const search = req.query.search || '';
+            const brand = req.query.brand || '';
+            const category = req.query.category || '';
+            const minPrice = parseFloat(req.query.minPrice) || 0;
+            const maxPrice = parseFloat(req.query.maxPrice) || Number.MAX_SAFE_INTEGER;
 
-            // Create a filter object for the search
-            const query = search ? { productName: { $regex: search, $options: 'i' } } : {};
+            // Create a filter object
+            const query = {
+                ...(search && { productName: { $regex: search, $options: 'i' } }),
+                ...(brand && { brandName: { $regex: brand, $options: 'i' } }),
+                ...(category && { category: { $regex: category, $options: 'i' } }),
+                price: { $gte: minPrice, $lte: maxPrice }
+            };
 
             const result = await productCollection.find(query)
                 .skip(skip)
                 .limit(limit)
                 .toArray();
 
-            const totalProducts = await productCollection.countDocuments(query); // Count based on the search query
+            const totalProducts = await productCollection.countDocuments(query);
             const totalPages = Math.ceil(totalProducts / limit);
 
             res.send({
@@ -58,6 +67,7 @@ async function run() {
                 currentPage: page
             });
         });
+
 
 
         // Send a ping to confirm a successful connection
