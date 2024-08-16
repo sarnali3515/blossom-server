@@ -6,7 +6,7 @@ const port = process.env.PORT || 5000;
 
 // middleware
 const corsOptions = {
-    origin: ['http://localhost:5173', 'https://blossoms-6a37b.web.app'],
+    origin: ['http://localhost:5173', 'https://blossoms-6a37b.web.app', 'https://blossoms-6a37b.firebaseapp.com'],
     credentials: true,
 }
 app.use(cors(corsOptions));
