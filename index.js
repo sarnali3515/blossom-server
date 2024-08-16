@@ -28,24 +28,29 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
 
-        const productCollection = client.db("blossom").collection("products")
+        const productCollection = client.db("blossomDB").collection("products")
 
         // app.get('/products', async (req, res) => {
         //     const result = await productCollection.find().toArray();
         //     res.send(result);
         // })
         app.get('/products', async (req, res) => {
-            const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
-            const limit = parseInt(req.query.limit) || 10; // Default to 10 products per page
-            const skip = (page - 1) * limit; // Calculate how many products to skip
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+            const skip = (page - 1) * limit;
 
-            const result = await productCollection.find()
-                .skip(skip) // Skip the number of products based on the current page
-                .limit(limit) // Limit the number of products returned
+            const search = req.query.search || '';
+
+            // Create a filter object for the search
+            const query = search ? { productName: { $regex: search, $options: 'i' } } : {};
+
+            const result = await productCollection.find(query)
+                .skip(skip)
+                .limit(limit)
                 .toArray();
 
-            const totalProducts = await productCollection.countDocuments(); // Get total number of products
-            const totalPages = Math.ceil(totalProducts / limit); // Calculate total pages
+            const totalProducts = await productCollection.countDocuments(query); // Count based on the search query
+            const totalPages = Math.ceil(totalProducts / limit);
 
             res.send({
                 products: result,
@@ -53,6 +58,7 @@ async function run() {
                 currentPage: page
             });
         });
+
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
